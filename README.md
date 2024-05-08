@@ -1,5 +1,7 @@
-This code package implements ProtoPMed-EEG from the paper "Mapping the Ictal-Interictal-Continuum 
-Using Interpretable Machine Learning (ProtoPMed-EEG)" by Alina Jade Barnett* (Duke University), 
+This code package implements ProtoPMed-EEG from the paper "Improving Clinician Performance in Classification of EEG Patterns
+on the Ictal-Interictal-Injury Continuum using Interpretable Machine
+Learning" by 
+Alina Jade Barnett* (Duke University), 
 Zhicheng Guo* (Duke University), Wendong Ge (Harvard University), Brandon Westover (Harvard University), 
 Jin Jing (Harvard University) and Cynthia Rudin (Duke University) (* denotes equal contribution).
 
@@ -10,7 +12,7 @@ Recommended hardware: 1 to 2 NVIDIA Tesla P-100 GPUs, or 2 NVIDIA Tesla K-80 GPU
 
 Note: the .sh files refernced here have been set up to work with a slurm batch submission system. 
       If you do not have a slurm batch submission system, you can run them by typing "source 
-      filename.sh" in the command line.
+      filename.sh" in the command line. You will need to request for data access.
 
 Instructions for preparing the data:
 1. The data processing code exists in dataHelper.py
