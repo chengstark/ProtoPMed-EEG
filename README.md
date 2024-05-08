@@ -5,27 +5,27 @@ Alina Jade Barnett* (Duke University),
 Zhicheng Guo* (Duke University), Wendong Ge (Harvard University), Brandon Westover (Harvard University), 
 Jin Jing (Harvard University) and Cynthia Rudin (Duke University) (* denotes equal contribution).
 
-This code package was SOLELY developed by the authors at Duke University and Harvard University.
+This code package was **SOLELY** developed by the authors at Duke University and Harvard University.
 
 
 
 
 ## Clincian Accuracy Improvement
-
+EEG pattern classification performance of the users with and without AI. All users performed significantly better (p<0.05) while provided with AI assistance.
 ![EEG pattern classification performance of the users with and without AI. All users performed significantly better (p<0.05) while provided with AI assistance.](https://github.com/chengstark/Interp.-EEG-Public/blob/main/figures/user_study_acc.png)
 
 ## Interpretability and Explanations for Clinicans
-
+Three explanation modes offered by our model.
 ![Three explanation modes offered by our model.](https://github.com/chengstark/Interp.-EEG-Public/blob/main/figures/model_explation_modes.png)
-
+Graphical user interface to for clinicans.
 ![Graphical user interface to for clinicans.](https://github.com/chengstark/Interp.-EEG-Public/blob/main/figures/gui.png)
 
 ## Clincian Accuracy Improvement
-
+EEG pattern classification performance of the users with and without AI. All users performed significantly better (p<0.05) while provided with AI assistance.
 ![EEG pattern classification performance of the users with and without AI. All users performed significantly better (p<0.05) while provided with AI assistance.](https://github.com/chengstark/Interp.-EEG-Public/blob/main/detailed_arch.png)
 
 ## Model Performance Compared to Uninterpretable SPaRCNet (Baseline)
-
+Our model performs significantly better than the baseline in terms of AUROC scores, AUPRC scores, neighborhood analysis by majority vote and neighborhood analysis by annotator vote distributions.
 ![Our model performs significantly better than the baseline in terms of AUROC scores, AUPRC scores, neighborhood analysis by majority vote and neighborhood analysis by annotator vote distributions.](https://github.com/chengstark/Interp.-EEG-Public/blob/main/figures/model_performance.png)
 
 
