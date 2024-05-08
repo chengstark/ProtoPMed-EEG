@@ -7,6 +7,14 @@ Jin Jing (Harvard University) and Cynthia Rudin (Duke University) (* denotes equ
 
 This code package was SOLELY developed by the authors at Duke University and Harvard University.
 
+
+## Model Architecture
+
+![alt text](https://github.com/chengstark/Interp.-EEG-Public/blob/main/detailed_arch.png)
+
+
+## Running the code
+
 Prerequisites: PyTorch version 1.10.2 
 Recommended hardware: 1 to 2 NVIDIA Tesla P-100 GPUs, or 2 NVIDIA Tesla K-80 GPUs, or 1 to 2 NVIDIA 2080RTX GPUs
 
