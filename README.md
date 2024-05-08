@@ -8,14 +8,30 @@ Jin Jing (Harvard University) and Cynthia Rudin (Duke University) (* denotes equ
 This code package was SOLELY developed by the authors at Duke University and Harvard University.
 
 
+
+
+## Clincian Accuracy Improvement
+
+![EEG pattern classification performance of the users with and without AI. All users performed significantly better (p<0.05) while provided with AI assistance.](https://github.com/chengstark/Interp.-EEG-Public/blob/main/detailed_arch.png)
+
+## Interpretability and Explanations for Clinicans
+
+![Explanation modes offered by our model.](https://github.com/chengstark/Interp.-EEG-Public/blob/main/detailed_arch.png)
+
+![Graphical user interface to for clinicans.](https://github.com/chengstark/Interp.-EEG-Public/blob/main/detailed_arch.png)
+
+## Clincian Accuracy Improvement
+
+![EEG pattern classification performance of the users with and without AI. All users performed significantly better (p<0.05) while provided with AI assistance.](https://github.com/chengstark/Interp.-EEG-Public/blob/main/detailed_arch.png)
+
+## Model Performance Compared to Uninterpretable SPaRCNet (Baseline)
+
+![Our model performs significantly better than the baseline in terms of AUROC scores, AUPRC scores, neighborhood analysis by majority vote and neighborhood analysis by annotator vote distributions.](https://github.com/chengstark/Interp.-EEG-Public/blob/main/detailed_arch.png)
+
+
 ## Model Architecture
 
-![alt text](https://github.com/chengstark/Interp.-EEG-Public/blob/main/detailed_arch.png)
-
-
-## Model Performance Compared to Baseline
-
-![alt text](https://github.com/chengstark/Interp.-EEG-Public/blob/main/detailed_arch.png)
+![ProtoPMed-EEG architecture.](https://github.com/chengstark/Interp.-EEG-Public/blob/main/detailed_arch.png)
 
 
 ## Running the code
