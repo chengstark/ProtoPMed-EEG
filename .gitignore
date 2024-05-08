@@ -1,4 +1,10 @@
-*.out
-*.pyc
-*.log
+*.out 
 *.csv
+*.txt
+*.npy
+*.pyc
+*.ann
+*.log
+*.bin
+*.pt
+*.pth
