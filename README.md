@@ -21,9 +21,6 @@ Three explanation modes offered by our model.
 ## Graphical user interface to for clinicans
 ![Graphical user interface to for clinicans.](https://github.com/chengstark/Interp.-EEG-Public/blob/main/figures/gui.png)
 
-## Clincian Accuracy Improvement
-EEG pattern classification performance of the users with and without AI. All users performed significantly better (p<0.05) while provided with AI assistance.
-![EEG pattern classification performance of the users with and without AI. All users performed significantly better (p<0.05) while provided with AI assistance.](https://github.com/chengstark/Interp.-EEG-Public/blob/main/detailed_arch.png)
 
 ## Model Performance Compared to Uninterpretable SPaRCNet (Baseline)
 Our model performs significantly better than the baseline in terms of AUROC scores, AUPRC scores, neighborhood analysis by majority vote and neighborhood analysis by annotator vote distributions.
