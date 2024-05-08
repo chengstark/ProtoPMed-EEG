@@ -12,7 +12,7 @@ EEG pattern classification performance of the users with and without AI. All use
 
 ## Interpretability and Explanations for Clinicians
 Three explanation modes offered by our model. <br />
-<img src="https://github.com/chengstark/Interp.-EEG-Public/blob/main/figures/model_explation_modes.png" width="50%" alt="Three explanation modes offered by our model.">
+<img src="https://github.com/chengstark/Interp.-EEG-Public/blob/main/figures/model_explation_modes.png" width="65%" alt="Three explanation modes offered by our model.">
 
 ## Graphical user interface to for clinicans
 <img src="https://github.com/chengstark/Interp.-EEG-Public/blob/main/figures/gui.png" width="70%" alt="Graphical user interface for clinicians.">
