@@ -14,7 +14,7 @@ EEG pattern classification performance of the users with and without AI. All use
 <img src="https://github.com/chengstark/Interp.-EEG-Public/blob/main/figures/user_study_acc.png" width="70%" alt="EEG pattern classification performance of the users with and without AI. All users performed significantly better (p<0.05) while provided with AI assistance.">
 
 ## Interpretability and Explanations for Clinicans
-Three explanation modes offered by our model.
+Three explanation modes offered by our model. <br />
 <img src="https://github.com/chengstark/Interp.-EEG-Public/blob/main/figures/model_explation_modes.png" width="50%" alt="Three explanation modes offered by our model.">
 
 ## Graphical user interface to for clinicans
