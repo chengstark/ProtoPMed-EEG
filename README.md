@@ -13,6 +13,11 @@ This code package was SOLELY developed by the authors at Duke University and Har
 ![alt text](https://github.com/chengstark/Interp.-EEG-Public/blob/main/detailed_arch.png)
 
 
+## Model Performance Compared to Baseline
+
+![alt text](https://github.com/chengstark/Interp.-EEG-Public/blob/main/detailed_arch.png)
+
+
 ## Running the code
 
 Prerequisites: PyTorch version 1.10.2 
