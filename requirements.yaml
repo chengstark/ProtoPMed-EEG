@@ -1,0 +1,24 @@
+name: interpeeg
+dependencies:
+  - cudatoolkit=10.2.89
+  - faiss-cpu=1.7.2
+  - h5py=2.10.0
+  - hdf5=1.10.6
+  - hdf5storage=0.1.16
+  - jupyter=1.0.0
+  - notebook=6.4.3
+  - matplotlib=3.3.4
+  - numpy=1.19.2
+  - pandas=1.1.5
+  - pillow=8.3.1
+  - python=3.6.13
+  - pytorch=1.10.2
+  - scikit-image=0.17.2
+  - scikit-learn=0.24.2
+  - scipy=1.5.2
+  - seaborn=0.11.2
+  - sqlite=3.38.0
+  - torchaudio=0.10.2
+  - torchsummary=1.5.1
+  - torchvision=0.11.3
+  - tqdm=4.64.1
