@@ -17,7 +17,8 @@ EEG pattern classification performance of the users with and without AI. All use
 ## Interpretability and Explanations for Clinicans
 Three explanation modes offered by our model.
 ![Three explanation modes offered by our model.](https://github.com/chengstark/Interp.-EEG-Public/blob/main/figures/model_explation_modes.png)
-Graphical user interface to for clinicans.
+
+## Graphical user interface to for clinicans
 ![Graphical user interface to for clinicans.](https://github.com/chengstark/Interp.-EEG-Public/blob/main/figures/gui.png)
 
 ## Clincian Accuracy Improvement
@@ -30,7 +31,6 @@ Our model performs significantly better than the baseline in terms of AUROC scor
 
 
 ## Model Architecture
-
 ![ProtoPMed-EEG architecture.](https://github.com/chengstark/Interp.-EEG-Public/blob/main/figures/detailed_arch.png)
 
 
