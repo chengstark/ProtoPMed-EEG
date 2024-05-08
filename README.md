@@ -9,23 +9,20 @@ This code package was **SOLELY** developed by the authors at Duke University and
 
 
 
-
 ## Clincian Accuracy Improvement
 EEG pattern classification performance of the users with and without AI. All users performed significantly better (p<0.05) while provided with AI assistance.
-![EEG pattern classification performance of the users with and without AI. All users performed significantly better (p<0.05) while provided with AI assistance.](https://github.com/chengstark/Interp.-EEG-Public/blob/main/figures/user_study_acc.png)
+<img src="https://github.com/chengstark/Interp.-EEG-Public/blob/main/figures/user_study_acc.png" width="70%" alt="EEG pattern classification performance of the users with and without AI. All users performed significantly better (p<0.05) while provided with AI assistance.">
 
 ## Interpretability and Explanations for Clinicans
 Three explanation modes offered by our model.
-![Three explanation modes offered by our model.](https://github.com/chengstark/Interp.-EEG-Public/blob/main/figures/model_explation_modes.png)
+<img src="https://github.com/chengstark/Interp.-EEG-Public/blob/main/figures/model_explation_modes.png" width="70%" alt="Three explanation modes offered by our model.">
 
 ## Graphical user interface to for clinicans
-![Graphical user interface to for clinicans.](https://github.com/chengstark/Interp.-EEG-Public/blob/main/figures/gui.png)
-
+<img src="https://github.com/chengstark/Interp.-EEG-Public/blob/main/figures/gui.png" width="70%" alt="Graphical user interface for clinicians.">
 
 ## Model Performance Compared to Uninterpretable SPaRCNet (Baseline)
 Our model performs significantly better than the baseline in terms of AUROC scores, AUPRC scores, neighborhood analysis by majority vote and neighborhood analysis by annotator vote distributions.
-![Our model performs significantly better than the baseline in terms of AUROC scores, AUPRC scores, neighborhood analysis by majority vote and neighborhood analysis by annotator vote distributions.](https://github.com/chengstark/Interp.-EEG-Public/blob/main/figures/model_performance.png)
-
+<img src="https://github.com/chengstark/Interp.-EEG-Public/blob/main/figures/model_performance.png" width="70%" alt="Our model performs significantly better than the baseline in terms of AUROC scores, AUPRC scores, neighborhood analysis by majority vote and neighborhood analysis by annotator vote distributions.">
 
 ## Model Architecture
 ![ProtoPMed-EEG architecture.](https://github.com/chengstark/Interp.-EEG-Public/blob/main/figures/detailed_arch.png)
