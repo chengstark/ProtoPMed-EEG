@@ -29,6 +29,8 @@ Our model performs significantly better than the baseline in terms of AUROC scor
 **Prerequisites**: PyTorch version 1.10.2
 **Recommended hardware**: 1 to 2 NVIDIA Tesla P-100 GPUs, or 2 NVIDIA Tesla K-80 GPUs, or 1 to 2 NVIDIA 2080RTX GPUs
 
+Download the model folder [here](https://drive.google.com/drive/folders/1snCQlW2Q9U8w3tUWtIHUYD2hpP8wSCKL?usp=sharing).
+
 Note: the .sh files refernced here have been set up to work with a slurm batch submission system. 
       If you do not have a slurm batch submission system, you can run them by typing "source 
       filename.sh" in the command line. You will need to request for data access.
@@ -55,3 +57,5 @@ train_push_dir:
 
 **Instructions for finding the nearest samples to each prototype:**
 1. Run run_global_analysis_annoy.sh
+
+
