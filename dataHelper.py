@@ -362,7 +362,8 @@ if __name__ == '__main__':
 
     # multiprocessing.set_start_method('loky')
 
-    number_of_cores = int(os.environ['SLURM_CPUS_PER_TASK'])
+    # number_of_cores = int(os.environ['SLURM_CPUS_PER_TASK'])
+    number_of_cores = multiprocessing.cpu_count()
     print(number_of_cores)
 
     # train_key_3 = list(np.load('/usr/xtmp/zg78/proto_proj/data/wendong_keys/3_train_key.npy'))
