@@ -260,6 +260,30 @@ def preprocess_signal_child(fn, src_dir, dst_dir, split, mat73):
 
 def multiprocess_preprocess_signals(src_dir, dst_dir, fn_lists, split='train', n_jobs=2, mat73=False):
 
+    """
+    Process signal data files using multiple processes and save the output in specified directories.
+
+    This function sets up directories for storing processed data, initializes a multiprocessing
+    pool to preprocess files, and saves results in pickle files. It handles .mat files, optionally
+    accounting for the v7.3 format.
+
+    Parameters:
+    - src_dir (str): Source directory containing .mat files.
+    - dst_dir (str): Destination directory for processed files.
+    - fn_lists (list of str): List of filenames to process. If None, processes all .mat files in src_dir.
+    - split (str): Subdirectory within dst_dir to store processed files (default: 'train').
+    - n_jobs (int): Number of worker processes to use (default: 2).
+    - mat73 (bool): Set to True if files are MATLAB v7.3 format (default: False).
+
+    The function does not return any value but outputs two pickle files: 'votes_dict.pkl' and 'votes_dict_raw.pkl',
+    containing processed data results.
+
+    Example:
+    ```python
+    multiprocess_preprocess_signals('/path/to/source', '/path/to/destination', ['data1.mat', 'data2.mat'])
+    ```
+    """
+
     if not os.path.exists(dst_dir):
         os.mkdir(dst_dir)
     
