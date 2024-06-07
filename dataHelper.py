@@ -61,6 +61,7 @@ class EEGDataset(Dataset):
 
 
 class EEGDataset_CV(Dataset):
+    
     def __init__(self, root_dir, n_folds=5, aug=False):
         super(EEGDataset).__init__()
 
@@ -106,6 +107,22 @@ class EEGDataset_CV(Dataset):
         return signal, vote, sample_id
 
     def construct_folds(self, n_folds):
+        """
+        This function constructs the folds for cross-validation. It first creates a list of unique patients from the signal file names. Then, it uses the KFold function from sklearn to split this list into training and validation sets for each fold. The indices of the samples for each fold are stored in the fold_sample_dict attribute.
+        
+        Args:
+            n_folds (int): The number of folds to split the data into for cross-validation.
+        
+        Raises:
+            ValueError: If 'n_folds' is not a positive integer.
+        
+        Note:
+            This function modifies the fold_sample_dict attribute in-place.
+        
+        Returns:
+            None
+        """
+        
         self.patient_list = list(set([fn.split('_')[0] for fn in self.signal_fns]))
         kf = KFold(n_splits=n_folds)
         
@@ -193,6 +210,21 @@ class EEGProtoDataset(Dataset):
 
 # TODO: write the real visualization function
 def save_signal_visualization(data_dir, filename, save_path, figsize=(10, 5)):
+    """This function saves the visualization of a signal.
+    
+    Args:
+        data_dir (str): The directory where the data file is located.
+        filename (str): The name of the data file.
+        save_path (str): The path where the visualization will be saved.
+        figsize (tuple, optional): The size of the figure. Defaults to (10, 5).
+    
+    Raises:
+        FileNotFoundError: If the data file does not exist.
+    
+    Returns:
+        None
+    """
+    
     if not save_path.endswith('.jpg'):
         save_path += '.jpg'
     signal = np.load(f'{data_dir}/{filename}')
@@ -204,7 +236,27 @@ def save_signal_visualization(data_dir, filename, save_path, figsize=(10, 5)):
 
 
 def preprocess_signals(src_dir, dst_dir, fn_lists, split='train'):
-
+    """This function preprocesses signals from a source directory and saves the processed signals in a destination directory. 
+    
+    Args:
+        src_dir (str): The source directory where the original signals are stored.
+        dst_dir (str): The destination directory where the processed signals will be saved.
+        fn_lists (list): A list of file names to be processed.
+        split (str, optional): The type of data split. Defaults to 'train'.
+    
+    The function first checks if the destination directory and the split subdirectory exist, and creates them if they don't. 
+    It then loads each file from the source directory, preprocesses the signal data, and saves the processed signal in the destination directory. 
+    The function also creates two dictionaries, votes_dict and votes_dict_raw, which store the maximum vote and the raw votes for each file, respectively. 
+    These dictionaries are saved in the split subdirectory of the destination directory.
+    
+    Note:
+        The signal preprocessing includes the following steps:
+        - Swapping certain channels, this is acoording to our medical specialist
+        - Applying a notch filter
+        - Applying a bandpass filter
+        - Clipping the signal values to the range [-500, 500]
+    """
+    
     if not os.path.exists(dst_dir):
         os.mkdir(dst_dir)
     
@@ -236,6 +288,23 @@ def preprocess_signals(src_dir, dst_dir, fn_lists, split='train'):
     
 
 def preprocess_signal_child(fn, src_dir, dst_dir, split, mat73):
+    """This function preprocesses the signal data for a child. It loads the data from a .mat file, applies a notch filter and a bandpass filter, clips the signal to a range of -500 to 500, and saves the processed signal as a .npy file.
+    
+    Args:
+        fn (str): The filename of the .mat file to be processed.
+        src_dir (str): The source directory where the .mat file is located.
+        dst_dir (str): The destination directory where the processed .npy file will be saved.
+        split (str): The split of the data (e.g., 'train', 'test').
+        mat73 (bool): A flag indicating whether the .mat file is in the v7.3 format.
+    
+    Returns:
+        tuple: A tuple containing the filename and the votes associated with the signal.
+    
+    Raises:
+        FileNotFoundError: If the .mat file cannot be found in the source directory.
+        ValueError: If the signal data in the .mat file is not in the expected format.
+    """
+    
     if mat73:
         mat = loadmat73(f'{src_dir}/{fn}')
     else:
@@ -321,6 +390,18 @@ def multiprocess_preprocess_signals(src_dir, dst_dir, fn_lists, split='train', n
 
 
 def extract_spec_child(fn, src_dir, dst_dir, split):
+    """This function extracts specific child elements from a given source directory and saves them into a destination directory.
+    
+    Args:
+        fn (str): The filename of the file to be processed.
+        src_dir (str): The source directory where the file is located.
+        dst_dir (str): The destination directory where the processed file will be saved.
+        split (str): The split type of the data.
+    
+    Returns:
+        None. The function saves the processed data into a .npy file in the destination directory.
+    """
+    
     mat = loadmat(f'{src_dir}/{fn}')
     spec_meta = mat['spec_10min']
     spec_mid10s = []
@@ -332,7 +413,22 @@ def extract_spec_child(fn, src_dir, dst_dir, split):
 
 
 def extract_spec(src_dir, dst_dir, fn_lists, split='train', n_jobs=2):
-
+    """This function is used to extract specifications from a source directory and save them in a destination directory. It uses multiprocessing to speed up the process.
+    
+    Args:
+        src_dir (str): The source directory from where the specifications are to be extracted.
+        dst_dir (str): The destination directory where the extracted specifications are to be saved.
+        fn_lists (list): A list of file names from which specifications are to be extracted.
+        split (str, optional): The type of data split. Defaults to 'train'.
+        n_jobs (int, optional): The number of jobs to run in parallel. Defaults to 2.
+    
+    Raises:
+        OSError: If the destination directory does not exist, it will be created.
+    
+    Note:
+        This function uses the 'Pool' class from the 'multiprocessing' module to create a pool of worker processes. It also uses the 'tqdm' module to show a progress bar.
+    """
+    
     if not os.path.exists(dst_dir):
         os.mkdir(dst_dir)
     
@@ -351,12 +447,43 @@ def extract_spec(src_dir, dst_dir, fn_lists, split='train', n_jobs=2):
 
 
 def votes_leq_20(votes):
+    """This function checks if the total sum of votes is greater than or equal to 20.
+    
+    Args:
+        votes (list): A list of integers representing votes.
+    
+    Returns:
+        bool: True if the sum of votes is greater than or equal to 20, False otherwise.
+    """
+
     return sum(votes) >= 20
 
 def votes_unanimous_85pct(votes):
+    """This function checks if the maximum vote count is at least 85% of the total vote count.
+    
+    Args:
+        votes (list): A list of integers representing vote counts.
+    
+    Returns:
+        bool: True if the maximum vote count is at least 85% of the total vote count, False otherwise.
+    """
+    
     return (max(votes) / sum(votes)) >= 0.85
 
 def create_push_folder(dataset_dir, condition_function):
+    """This function creates a new directory for a specific condition within a dataset directory and copies relevant files into it. 
+    
+    Args:
+        dataset_dir (str): The directory path where the dataset is located.
+        condition_function (function): The function that defines the condition for which the new directory is created.
+    
+    The function first checks if a directory for the condition already exists within the dataset directory. If not, it creates one. 
+    It then loads two dictionaries from pickle files: 'votes_dict_raw.pkl' and 'votes_dict.pkl'. 
+    It creates a list of sample IDs that meet the condition defined by 'condition_function' and copies the corresponding '.npy' files into the new directory. 
+    It also creates two new dictionaries that only include the entries for the sample IDs that meet the condition and saves them as pickle files in the new directory.
+    
+    Note: The function assumes that the 'votes_dict_raw.pkl' and 'votes_dict.pkl' files exist in a 'train' subdirectory within the dataset directory.
+    """
 
     condition_name = condition_function.__name__
     if not os.path.exists(f'{dataset_dir}/push_{condition_name}/'):
@@ -424,7 +551,6 @@ if __name__ == '__main__':
     # print(len(vote_dict_combined.keys()))
     # pkl.dump(vote_dict_combined, open('/usr/xtmp/zg78/proto_proj/data/combined_train_test_split/train/votes_dict.pkl', 'wb'))
     # print([f for f in os.listdir('/usr/xtmp/zg78/proto_proj/data/combined_train_test_split/train/') if f.endswith('.npy') and f[:-4] not in vote_dict_combined.keys()])
-
 
     # create_push_folder('/usr/xtmp/zg78/proto_proj/data/10_train_test_split_50s_rerun/', votes_leq_20)
     # create_push_folder('/usr/xtmp/zg78/proto_proj/data/10_train_test_split_50s_rerun/', votes_unanimous_85pct)
