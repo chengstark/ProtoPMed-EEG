@@ -29,7 +29,7 @@ Our model performs significantly better than the baseline in terms of AUROC scor
 **Prerequisites**: PyTorch version 1.10.2
 **Recommended hardware**: 1 to 2 NVIDIA Tesla P-100 GPUs, or 2 NVIDIA Tesla K-80 GPUs, or 1 to 2 NVIDIA 2080RTX GPUs
 
-Download the model folder [here](https://drive.google.com/drive/folders/1snCQlW2Q9U8w3tUWtIHUYD2hpP8wSCKL?usp=sharing).
+Download the model folder (including, model weight, prototype data and prototype json file) [here](https://drive.google.com/drive/folders/1snCQlW2Q9U8w3tUWtIHUYD2hpP8wSCKL?usp=sharing).
 
 Note: the .sh files refernced here have been set up to work with a slurm batch submission system. 
       If you do not have a slurm batch submission system, you can run them by typing "source 
