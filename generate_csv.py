@@ -195,26 +195,8 @@ if __name__ == "__main__":
 
     probs = np.concatenate((probs, proto_probs), axis=0)
     
-    print('Building annoy', flush=True)
-    annoy_index = build_annoy(features, f'{save_dir}/annoy_index.ann', save=True)
-
-    print('Calculating neighbours', flush=True)
-    nbrs = annoy_pacmap_prepare(features, annoy_index, save_dir)
-    np.save(f'{save_dir}/nbrs.npy', nbrs)
-
-    ########################PacMAP########################
-
-    print('Running PacMAP', flush=True)
-    n_neighbors = 18
-    n, dim = features.shape
-
-    scaled_dist = np.ones((n, n_neighbors)) # No scaling is needed
-    scaled_dist = scaled_dist.astype(np.float32)
-
-    pair_neighbors = pacmap.sample_neighbors_pair(features.astype(np.float32), scaled_dist, nbrs, np.int32(n_neighbors))
-
-    embedding = pacmap.PaCMAP(n_dims=2, n_neighbors=n_neighbors, MN_ratio=0.5, FP_ratio=2.0, pair_neighbors=pair_neighbors)
-    X_transformed = embedding.fit_transform(features, init="random")
+    embedding = pacmap.PaCMAP(n_components=2, n_neighbors=None, MN_ratio=0.5, FP_ratio=2.0, distance='angular') 
+    X_transformed = embedding.fit_transform(features, init="pca")
 
     proto_json = json_load(proto_path)
     proto_class = np.array_split(np.argmax(last_layer_transpose, axis=1), 6)
