@@ -5,7 +5,6 @@ import os
 import faiss
 import datetime
 from itertools import product
-from annoy import AnnoyIndex
 import pacmap
 import matplotlib.pyplot as plt
 from tqdm.auto import tqdm
@@ -110,60 +109,6 @@ def extract_proto_probs(data_dir, proto_ids, model_path, save_dir):
     np.save(f'{save_dir}/proto_logits_marginlesses.npy', logits_marginlesses)
 
 
-def build_annoy(feats, annoy_path, save=True,):
-    f = feats.shape[1]
-    a = AnnoyIndex(f, 'angular')
-
-    # if os.path.exists(annoy_path):
-    #     a.load(annoy_path)
-    #     print('Annoy loaded from', annoy_path)
-    # else:
-    print('Building AnnoyIndex for warm up feats of shape {}'.format(feats.shape))
-    a.set_seed(1)
-    for idx, feat in enumerate(tqdm(feats)):
-        a.add_item(idx, feat)
-
-    a.build(1000, n_jobs=multiprocessing.cpu_count()-2)  # 10 trees
-    
-    if save:
-        a.save(annoy_path)
-        print('Annoy saved to', annoy_path)
-    
-    return a
-
-
-def annoy_pacmap_prepare_child(idx_t, annoy_index_path, f):
-
-    annoy_index = AnnoyIndex(f, 'angular')
-    annoy_index.load(annoy_index_path)
-    return idx_t, annoy_index.get_nns_by_item(idx_t, 1000 + 1)
-
-
-def annoy_pacmap_prepare(feats, annoy_index, save_dir):
-    
-    print('Running')
-        
-    tmp_annoy_index_path = f'{save_dir}/tmp_annoy_index.ann'
-    f = feats.shape[1]
-    annoy_index.save(tmp_annoy_index_path)
-
-    pool_args = []
-    for idx_t in tqdm(range(feats.shape[0])):
-        pool_args.append([idx_t, tmp_annoy_index_path, f])
-    
-    n, dim = feats.shape
-    nbrs = np.zeros((n, 1000), dtype=np.int32)
-    
-    pool = Pool(processes=multiprocessing.cpu_count())
-
-    for rst in tqdm(pool.istarmap(annoy_pacmap_prepare_child, pool_args), total=len(pool_args)):
-        nbrs[rst[0], :] = rst[1][1:]
-
-    pool.terminate()
-    
-    return nbrs
-
-
 if __name__ == "__main__":
     print('argparse', flush=True)
     args, save_dir, proto_path, data_dir, data_dir_root, model_path, csv_name = prase_args()
@@ -194,7 +139,7 @@ if __name__ == "__main__":
     proto_probs = F.softmax(torch.from_numpy(proto_logits), dim=1).numpy()
 
     probs = np.concatenate((probs, proto_probs), axis=0)
-    
+
     embedding = pacmap.PaCMAP(n_components=2, n_neighbors=None, MN_ratio=0.5, FP_ratio=2.0, distance='angular') 
     X_transformed = embedding.fit_transform(features, init="pca")
 
