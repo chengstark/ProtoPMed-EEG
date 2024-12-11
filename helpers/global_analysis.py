@@ -1,6 +1,8 @@
 import torch
 import torch.utils.data
-from dataHelper import EEGDataset, save_signal_visualization
+import sys
+sys.path.append('../src/')
+from dataset import EEGDataset
 import json
 import os
 import re
