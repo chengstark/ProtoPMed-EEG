@@ -34,11 +34,11 @@ echo $data_dir
 echo $model_path
 echo $csv_name
 
-python local_analysis_v2.py  \
+python ../helpers/local_analysis_v2.py  \
     -sample_root_dir $sample_root_dir \
     -model_path $model_path
 
-python generate_csv.py \
+python ../helpers/generate_csv.py \
     --data_dir $data_dir \
     --model_path $model_path \
     --csv_name $csv_name

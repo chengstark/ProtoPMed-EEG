@@ -7,4 +7,4 @@ echo "start running"
 source /home/users/zg78/miniconda3/bin/activate
 conda activate proto
 
-python dataHelper.py
+python ../src/dataset.py

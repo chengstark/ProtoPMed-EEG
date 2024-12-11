@@ -8,7 +8,7 @@ train_dir="/usr/xtmp/zg78/proto_proj/data/10_train_test_split_50s_rerun/train/"
 test_dir="/usr/xtmp/zg78/proto_proj/data/10_train_test_split_50s_rerun/test/"
 
 
-python calc_neighbourhood_agreement.py  \
+python ../helpers/calc_neighbourhood_agreement.py  \
     -json_dir $json_dir \
     -train_dir $train_dir \
     -test_dir $test_dir

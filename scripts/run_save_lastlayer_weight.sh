@@ -29,7 +29,7 @@ echo $data_dir
 echo $model_path
 echo $csv_name
 
-python save_lastlayer_weight.py \
+python ../helpers/save_lastlayer_weight.py \
     --data_dir $data_dir \
     --model_path $model_path \
     --csv_name $csv_name

@@ -10,7 +10,7 @@ train_dir="/usr/xtmp/zg78/proto_proj/data/10_train_test_split_50s_/train/"
 test_dir="/usr/xtmp/zg78/proto_proj/data/10_train_test_split_50s_/test/"
 
 
-python global_analysis_annoy.py  \
+python ../helpers/global_analysis_annoy.py  \
     -model_path $model_path \
     -train_dir $train_dir \
     -test_dir $test_dir

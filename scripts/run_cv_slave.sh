@@ -7,7 +7,7 @@ nvidia-smi
 
 echo "fold_idx $1"
 
-python main.py  -experiment_run="CV_miniset_test_fold_${1}" \
+python ../src/main.py  -experiment_run="CV_miniset_test_fold_${1}" \
     -last_layer_weight=-1 \
     -random_seed=44 \
     -gpuid=0,1 \

@@ -11,8 +11,6 @@ import torch
 import matplotlib.pyplot as plt
 from sklearn.utils.class_weight import compute_class_weight
 from multiprocessing import Pool, cpu_count
-import istarmap
-import time
 import shutil
 import multiprocessing
 import random
@@ -20,35 +18,38 @@ import random
 from sklearn.model_selection import KFold
 from collections import defaultdict
 
-
 class EEGDataset(Dataset):
-    def __init__(self, root_dir, aug=False):
-        super(EEGDataset).__init__()
+    """
+    EEG dataset for loading signals and corresponding votes.
 
+    Args:
+        root_dir (str): Directory containing signal files.
+        aug (bool): Whether to apply augmentation.
+    """
+    def __init__(self, root_dir, aug=False):
+        super(EEGDataset, self).__init__()
         self.aug = aug
         self.root_dir = root_dir
         self.signals = []
         self.signal_fns = []
 
-        print(f'[Dataloader] loading data from {root_dir}', flush=True)
-
+        print(f'[Dataloader] Loading data from {root_dir}', flush=True)
         files = sorted(os.listdir(self.root_dir))
-        # files = random.sample(list(os.listdir(self.root_dir)), 2000)
+
         for idx, fn in enumerate(files):
             if fn.endswith('.npy'):
                 self.signals.append(np.load(f'{self.root_dir}/{fn}'))
                 self.signal_fns.append(fn)
 
                 if idx % 2000 == 0:
-                    print(f'[Dataloader] loading data {idx}', flush=True)
+                    print(f'[Dataloader] Loading data {idx}', flush=True)
 
-        print(f'[Dataloader] loading data Finished', flush=True)
-
+        print(f'[Dataloader] Loading data finished', flush=True)
         self.votes_dict = pkl.load(open(f'{self.root_dir}/votes_dict.pkl', 'rb'))
 
     def __len__(self):
         return len(self.signal_fns)
-    
+
     def __getitem__(self, idx):
         sample_id = self.signal_fns[idx]
         signal = torch.from_numpy(self.signals[idx]).type(torch.FloatTensor)
@@ -59,46 +60,47 @@ class EEGDataset(Dataset):
         vote = torch.from_numpy(np.asarray(self.votes_dict[self.signal_fns[idx][:-4]])).type(torch.long)
         return signal, vote, sample_id
 
-
 class EEGDataset_CV(Dataset):
-    
-    def __init__(self, root_dir, n_folds=5, aug=False):
-        super(EEGDataset).__init__()
+    """
+    EEG dataset for cross-validation.
 
+    Args:
+        root_dir (str): Directory containing signal files.
+        n_folds (int): Number of cross-validation folds.
+        aug (bool): Whether to apply augmentation.
+    """
+    def __init__(self, root_dir, n_folds=5, aug=False):
+        super(EEGDataset_CV, self).__init__()
         self.aug = aug
         self.root_dir = root_dir
         self.split = self.root_dir.split('/')[-2]
         self.signals = []
         self.signal_fns = []
         self.patient_list = []
-        self.fold_sample_dict = defaultdict(lambda: [[],[]])
+        self.fold_sample_dict = defaultdict(lambda: [[], []])
         self.length = len(self.signal_fns)
 
-        print(f'[Dataloader] loading data from {root_dir}', flush=True)
-
+        print(f'[Dataloader] Loading data from {root_dir}', flush=True)
         files_list = os.listdir(self.root_dir)
-        # files_list = random.sample(list(os.listdir(self.root_dir)), 20)
         for idx, fn in enumerate(sorted(files_list)):
             if fn.endswith('.npy'):
                 self.signals.append(np.load(f'{self.root_dir}/{fn}'))
                 self.signal_fns.append(fn)
 
                 if idx % 500 == 0:
-                    print(f'[Dataloader] loading data {idx}', flush=True)
+                    print(f'[Dataloader] Loading data {idx}', flush=True)
 
-        print(f'[Dataloader] loading data Finished', flush=True)
+        print(f'[Dataloader] Loading data finished', flush=True)
         self.votes_dict = pkl.load(open(f'{self.root_dir}/votes_dict.pkl', 'rb'))
-
         self.construct_folds(n_folds)
-    
+
     def __len__(self):
         return self.length
-    
+
     def __getitem__(self, index):
         idx = self.sample_idxs[index]
         sample_id = self.signal_fns[idx]
         signal = torch.from_numpy(self.signals[idx]).type(torch.FloatTensor)
-        
         if self.aug:
             if torch.rand(1) < 0.5:
                 signal[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]] = signal[[4, 5, 6, 7, 0, 1, 2, 3, 12, 13, 14, 15, 8, 9, 10, 11]]
@@ -108,107 +110,68 @@ class EEGDataset_CV(Dataset):
 
     def construct_folds(self, n_folds):
         """
-        This function constructs the folds for cross-validation. It first creates a list of unique patients from the signal file names. Then, it uses the KFold function from sklearn to split this list into training and validation sets for each fold. The indices of the samples for each fold are stored in the fold_sample_dict attribute.
-        
+        Construct folds for cross-validation.
+
         Args:
-            n_folds (int): The number of folds to split the data into for cross-validation.
-        
-        Raises:
-            ValueError: If 'n_folds' is not a positive integer.
-        
-        Note:
-            This function modifies the fold_sample_dict attribute in-place.
-        
-        Returns:
-            None
+            n_folds (int): Number of folds.
         """
-        
         self.patient_list = list(set([fn.split('_')[0] for fn in self.signal_fns]))
         kf = KFold(n_splits=n_folds)
-        
-        fold_index = 0
 
+        fold_index = 0
         for train_index, val_index in kf.split(self.patient_list):
             self.fold_sample_dict[fold_index][0] = [index for index, fn in enumerate(self.signal_fns) if fn.split('_')[0] in np.asarray(self.patient_list)[train_index]]
             self.fold_sample_dict[fold_index][1] = [index for index, fn in enumerate(self.signal_fns) if fn.split('_')[0] in np.asarray(self.patient_list)[val_index]]
             fold_index += 1
 
     def set_train(self, fold_index):
+        """
+        Set dataset to training samples for a specific fold.
+
+        Args:
+            fold_index (int): Fold index.
+        """
         self.sample_idxs = self.fold_sample_dict[fold_index][0]
         self.length = len(self.sample_idxs)
 
     def set_val(self, fold_index):
+        """
+        Set dataset to validation samples for a specific fold.
+
+        Args:
+            fold_index (int): Fold index.
+        """
         self.sample_idxs = self.fold_sample_dict[fold_index][1]
         self.length = len(self.sample_idxs)
 
     def set_all(self):
+        """
+        Use all samples in the dataset.
+        """
         self.sample_idxs = np.asarray(list(range(len(self.signal_fns))))
         self.length = len(self.sample_idxs)
 
-
-# class EEGDataset(Dataset):
-#     def __init__(self, root_dir, aug=False):
-#         super(EEGDataset).__init__()
-
-#         self.aug = aug
-#         self.root_dir = root_dir
-#         self.split = self.root_dir.split('/')[-2]
-#         self.spec_root_dir = '/'.join(self.root_dir.split('/')[:-2]) + "_spec_mid10s/"+self.split+"/"
-#         self.signals = []
-#         self.specs = []
-#         self.signal_fns = []
-
-#         if not os.path.exists(self.spec_root_dir):
-#             raise ValueError(f"spec_root_dir {self.spec_root_dir} doesn't exist")
-
-#         print(f'[Dataloader] loading data from {root_dir} and {self.spec_root_dir}', flush=True)
-
-#         for idx, fn in enumerate(sorted(os.listdir(self.root_dir))):
-#             if fn.endswith('.npy'):
-#                 self.signals.append(np.load(f'{self.root_dir}/{fn}'))
-#                 self.signal_fns.append(fn)
-#                 self.specs.append(np.load(f'{self.spec_root_dir}/{fn}'))
-
-#                 if idx % 2000 == 0:
-#                     print(f'[Dataloader] loading data {idx}', flush=True)
-
-#         print(f'[Dataloader] loading data Finished', flush=True)
-#         self.votes_dict = pkl.load(open(f'{self.root_dir}/votes_dict.pkl', 'rb'))
-
-#     def __len__(self):
-#         return len(self.signal_fns)
-    
-#     def __getitem__(self, idx):
-#         sample_id = self.signal_fns[idx]
-#         signal = torch.from_numpy(self.signals[idx]).type(torch.FloatTensor)
-#         spectrogram = torch.from_numpy(self.specs[idx]).type(torch.FloatTensor)
-        
-#         if self.aug:
-#             if torch.rand(1) < 0.5:
-#                 signal[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]] = signal[[4, 5, 6, 7, 0, 1, 2, 3, 12, 13, 14, 15, 8, 9, 10, 11]]
-
-#         vote = torch.from_numpy(np.asarray(self.votes_dict[self.signal_fns[idx][:-4]])).type(torch.long)
-#         return signal, spectrogram, vote, sample_id
-
-
 class EEGProtoDataset(Dataset):
-    def __init__(self, root_dir, proto_ids):
-        super(EEGProtoDataset).__init__()
+    """
+    EEG dataset for prototype signals.
 
+    Args:
+        root_dir (str): Directory containing prototype signal files.
+        proto_ids (list): List of prototype IDs.
+    """
+    def __init__(self, root_dir, proto_ids):
+        super(EEGProtoDataset, self).__init__()
         self.root_dir = root_dir
         self.proto_ids = proto_ids
 
     def __len__(self):
         return len(self.proto_ids)
-    
+
     def __getitem__(self, idx):
         proto_id = self.proto_ids[idx]
         signal = torch.from_numpy(np.load(f'{self.root_dir}/{proto_id}.npy')).type(torch.FloatTensor)
-        
         return signal, proto_id
-    
 
-# TODO: write the real visualization function
 def save_signal_visualization(data_dir, filename, save_path, figsize=(10, 5)):
     """This function saves the visualization of a signal.
     
@@ -285,6 +248,56 @@ def preprocess_signals(src_dir, dst_dir, fn_lists, split='train'):
 
     pkl.dump(votes_dict, open(f'{os.path.join(dst_dir, split)}/votes_dict.pkl', 'wb'))
     pkl.dump(votes_dict_raw, open(f'{os.path.join(dst_dir, split)}/votes_dict_raw.pkl', 'wb'))
+
+
+class EEGDatasetCustom(Dataset):
+    def __init__(self, root_dir, aug=False):
+        """
+        Custom EEG Dataset.
+
+        Args:
+            root_dir (str): Directory containing EEG data.
+            aug (bool): Whether to apply data augmentation.
+        """
+        super(EEGDatasetCustom).__init__()
+
+        self.aug = aug
+        self.root_dir = root_dir
+        self.signals = []
+        self.signal_fns = []
+
+        print(f'[Dataloader] Loading data from {root_dir}', flush=True)
+
+        files = sorted(os.listdir(self.root_dir))
+        print(f'[Dataloader] {len(files)} files to be loaded', flush=True)
+
+        for idx, fn in enumerate(files):
+            if fn.endswith('.npy'):
+                self.signals.append(np.load(f'{self.root_dir}/{fn}'))
+                self.signal_fns.append(fn)
+
+                if idx % 2000 == 0:
+                    print(f'[Dataloader] Loading data {idx}', flush=True)
+
+        print(f'[Dataloader] Loading data finished', flush=True)
+
+        self.votes_dict = pkl.load(open(f'{self.root_dir}/votes_dict.pkl', 'rb'))
+
+    def __len__(self):
+        return len(self.signal_fns)
+
+    def __getitem__(self, idx):
+        sample_id = self.signal_fns[idx]
+        signal = torch.from_numpy(self.signals[idx]).type(torch.FloatTensor)
+        if self.aug:
+            if torch.rand(1) < 0.5:
+                signal[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]] = signal[[4, 5, 6, 7, 0, 1, 2, 3, 12, 13, 14, 15, 8, 9, 10, 11]]
+
+        vote = torch.from_numpy(np.asarray(self.votes_dict[self.signal_fns[idx][:-4]])).type(torch.long)
+        return signal, vote, sample_id
+
+    def get_signal_fns(self):
+        return self.signal_fns
     
 
 def preprocess_signal_child(fn, src_dir, dst_dir, split, mat73):
@@ -510,49 +523,8 @@ def create_push_folder(dataset_dir, condition_function):
     
 
 if __name__ == '__main__':
-
-    # multiprocessing.set_start_method('loky')
-
-    # number_of_cores = int(os.environ['SLURM_CPUS_PER_TASK'])
     number_of_cores = multiprocessing.cpu_count()
     print(number_of_cores)
-
-    # train_key_3 = list(np.load('/usr/xtmp/zg78/proto_proj/data/wendong_keys/3_train_key.npy'))
-    # train_key_10 = list(np.load('/usr/xtmp/zg78/proto_proj/data/wendong_keys/10_train_key.npy'))
-    # test_key_10 = list(np.load('/usr/xtmp/zg78/proto_proj/data/wendong_keys/10_test_key.npy'))
-
-    # print('processing train key 3', flush=True)
-    # multiprocess_preprocess_signals('/usr/xtmp/zg78/proto_proj/data/OCT2023/', '/usr/xtmp/zg78/proto_proj/data/3_train_test_split_50s_rerun/', train_key_3, split='train', n_jobs=number_of_cores)
-    # print('processing train key 10', flush=True)
-    # multiprocess_preprocess_signals('/usr/xtmp/zg78/proto_proj/data/OCT2023/', '/usr/xtmp/zg78/proto_proj/data/10_train_test_split_50s_rerun/', train_key_10, split='train', n_jobs=number_of_cores)
-    # print('processing test key 10', flush=True)
-    # multiprocess_preprocess_signals('/usr/xtmp/zg78/proto_proj/data/OCT2023/', '/usr/xtmp/zg78/proto_proj/data/10_train_test_split_50s_rerun/', test_key_10, split='test', n_jobs=number_of_cores)
-
-    
     print('processing external_test', flush=True)
     multiprocess_preprocess_signals('/usr/xtmp/zg78/proto_proj/data/external_test/', '/usr/xtmp/zg78/proto_proj/data/external_test/', None, split='test', n_jobs=number_of_cores, mat73=True)
-
-    # print('processing train key 3', flush=True)
-    # extract_spec('/usr/xtmp/zg78/proto_proj/data/redownloaddata/', '/usr/xtmp/zg78/proto_proj/data/3_train_test_split_spec_mid10s/', train_key_3, split='train', n_jobs=number_of_cores)
-    # print('processing train key 10', flush=True)
-    # extract_spec('/usr/xtmp/zg78/proto_proj/data/redownloaddata/', '/usr/xtmp/zg78/proto_proj/data/10_train_test_split_spec_mid10s/', train_key_10, split='train', n_jobs=number_of_cores)
-    # print('processing test key 10', flush=True)
-    # extract_spec('/usr/xtmp/zg78/proto_proj/data/redownloaddata/', '/usr/xtmp/zg78/proto_proj/data/10_train_test_split_spec_mid10s/', test_key_10, split='test', n_jobs=number_of_cores)
-    # print('processing push_votes_leq_20 for 10 key', flush=True)
-    # extract_spec('/usr/xtmp/zg78/proto_proj/data/redownloaddata/', '/usr/xtmp/zg78/proto_proj/data/10_train_test_split_50s__spec_mid10s/', [fn[:-4] for fn in os.listdir('/usr/xtmp/zg78/proto_proj/data/10_train_test_split_50s_/push_votes_leq_20/') if fn.endswith('.npy')], split='push_votes_leq_20', n_jobs=number_of_cores)
-
-    # print(len(os.listdir('/usr/xtmp/zg78/proto_proj/data/combined_train_test_split/train/')))
-
-    # vote_dict_3 = pkl.load(open('/usr/xtmp/zg78/proto_proj/data/3_train_test_split/train/votes_dict.pkl', 'rb'))
-    # vote_dict_10 = pkl.load(open('/usr/xtmp/zg78/proto_proj/data/10_train_test_split/train/votes_dict.pkl', 'rb'))
-    # vote_dict_combined = vote_dict_3.copy()
-    # vote_dict_combined.update(vote_dict_10)
-
-    # print(len(vote_dict_combined.keys()))
-    # pkl.dump(vote_dict_combined, open('/usr/xtmp/zg78/proto_proj/data/combined_train_test_split/train/votes_dict.pkl', 'wb'))
-    # print([f for f in os.listdir('/usr/xtmp/zg78/proto_proj/data/combined_train_test_split/train/') if f.endswith('.npy') and f[:-4] not in vote_dict_combined.keys()])
-
-    # create_push_folder('/usr/xtmp/zg78/proto_proj/data/10_train_test_split_50s_rerun/', votes_leq_20)
-    # create_push_folder('/usr/xtmp/zg78/proto_proj/data/10_train_test_split_50s_rerun/', votes_unanimous_85pct)
-
 

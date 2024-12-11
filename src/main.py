@@ -9,7 +9,7 @@ import torch.utils.data
 
 import argparse
 from dataHelper import EEGDataset, EEGDataset_CV
-from helpers import makedir
+from helpers import makedir, save_model_w_condition
 import model
 import push
 import train_and_test as tnt
@@ -19,6 +19,8 @@ import random
 from datetime import datetime
 
 from eeg_model_features import _DenseBlock, _DenseLayer, DenseNetClassifier, _Transition, DenseNetEnconder
+
+
 
 
 parser = argparse.ArgumentParser()
@@ -203,7 +205,7 @@ for epoch in range(num_train_epochs):
 
     acc, test_seizure_roc_auc = tnt.test(model=ppnet_multi, dataloader=test_loader, log=log, epoch=epoch)
     if epoch % 10 == 0:
-        save.save_model_w_condition(model=ppnet, model_dir=model_dir, model_name=str(epoch) + 'nopush', accu=acc,
+        save_model_w_condition(model=ppnet, model_dir=model_dir, model_name=str(epoch) + 'nopush', accu=acc,
                                     target_accu=0.00, log=log)
 
     train_acc.append(train_acc_)
@@ -233,7 +235,7 @@ for epoch in range(num_train_epochs):
             epoch_number=epoch, # if not provided, prototypes saved previously will be overwritten
             log=log)
         accu, test_seizure_roc_auc = tnt.test(model=ppnet_multi, dataloader=test_loader, log=log)
-        save.save_model_w_condition(model=ppnet, model_dir=model_dir, model_name=str(epoch) + 'push', accu=accu,
+        save_model_w_condition(model=ppnet, model_dir=model_dir, model_name=str(epoch) + 'push', accu=accu,
                                     target_accu=0.00, log=log)
 
         if prototype_activation_function != 'linear':
@@ -242,7 +244,7 @@ for epoch in range(num_train_epochs):
                 log('iteration: \t{0}'.format(i))
                 train_acc_, _ = tnt.train(model=ppnet_multi, dataloader=train_loader, optimizer=last_layer_optimizer, coefs=coefs, log=log)
                 test_acc_, test_seizure_roc_auc = tnt.test(model=ppnet_multi, dataloader=test_loader, log=log)
-                save.save_model_w_condition(model=ppnet, model_dir=model_dir, model_name=str(epoch) + '_' + str(i) + 'push', accu=test_acc_,
+                save_model_w_condition(model=ppnet, model_dir=model_dir, model_name=str(epoch) + '_' + str(i) + 'push', accu=test_acc_,
                                             target_accu=0.00, log=log)
                 train_acc.append(train_acc_)
                 test_acc.append(test_acc_)

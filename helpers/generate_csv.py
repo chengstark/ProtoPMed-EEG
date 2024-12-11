@@ -20,13 +20,17 @@ import multiprocessing.pool as mpp
 from multiprocessing import Pool
 import argparse
 import torch.nn.functional as F
-
 import multiprocessing
+
 multiprocessing.cpu_count()
 
+def parse_args():
+    """
+    Parse command-line arguments.
 
-def prase_args():
-
+    Returns:
+        tuple: Parsed arguments and relevant paths.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_dir', type=str)
     parser.add_argument('--model_path', type=str)
@@ -37,16 +41,24 @@ def prase_args():
     data_dir = args.data_dir
     data_dir_root = '/'.join(data_dir.split('/')[:-2])
     model_path = args.model_path
-    save_dir = model_path[:-4]+f"_extracted_features/{data_dir.replace('/', '_')}/"
-    proto_path = '/'.join(model_path.split('/')[:-1])+'/protos/epoch-'+model_path.split('/')[-1].split('push')[0].split('_')[0]+'/global_max_proto_filenames_dict.json'
+    save_dir = model_path[:-4] + f"_extracted_features/{data_dir.replace('/', '_')}/"
+    proto_path = '/'.join(model_path.split('/')[:-1]) + '/protos/epoch-' + model_path.split('/')[-1].split('push')[0].split('_')[0] + '/global_max_proto_filenames_dict.json'
+
     print(save_dir)
     print(proto_path)
     print(data_dir_root)
 
     return args, save_dir, proto_path, data_dir, data_dir_root, model_path, csv_name
 
-
 def feature_extract(data_dir, model_path, save_dir):
+    """
+    Extract features from the model.
+
+    Args:
+        data_dir (str): Path to data directory.
+        model_path (str): Path to the model.
+        save_dir (str): Path to save extracted features.
+    """
     ppnet = torch.load(model_path)
 
     dataset = EEGDataset(data_dir)
@@ -60,6 +72,7 @@ def feature_extract(data_dir, model_path, save_dir):
     labels = []
     activations = []
     logits_marginlesses = []
+
     for _, (image, label, sample_id) in enumerate(tqdm(dataloader)):
         x = image.cuda()
         _, logits_marginless, activation = ppnet(x)
@@ -71,6 +84,7 @@ def feature_extract(data_dir, model_path, save_dir):
         extracted_features.append(features)
         labels.append(label)
         activations.append(activation.detach().cpu().numpy())
+
     logits_marginlesses = np.concatenate(logits_marginlesses, axis=0)
     extracted_features = np.concatenate(extracted_features, axis=0)
     predictions = np.concatenate(predictions, axis=0)
@@ -78,8 +92,9 @@ def feature_extract(data_dir, model_path, save_dir):
     labels = np.concatenate(labels, axis=0)
     sample_ids = np.array(sample_ids, dtype="object")
     sample_ids = np.concatenate(sample_ids, axis=0)
+
     print(f'Extracted features with shape {extracted_features.shape}')
-    
+
     os.makedirs(save_dir, exist_ok=True)
     np.save(f'{save_dir}/logits_marginlesses.npy', logits_marginlesses)
     np.save(f'{save_dir}/activations.npy', activations)
@@ -88,8 +103,16 @@ def feature_extract(data_dir, model_path, save_dir):
     np.save(f'{save_dir}/extracted_features.npy', extracted_features)
     np.save(f'{save_dir}/sample_ids.npy', sample_ids)
 
-
 def extract_proto_probs(data_dir, proto_ids, model_path, save_dir):
+    """
+    Extract prototype probabilities.
+
+    Args:
+        data_dir (str): Path to data directory.
+        proto_ids (list): List of prototype IDs.
+        model_path (str): Path to the model.
+        save_dir (str): Path to save prototype probabilities.
+    """
     print(f'saved proto probs to {save_dir}', flush=True)
     ppnet = torch.load(model_path)
 
@@ -108,10 +131,9 @@ def extract_proto_probs(data_dir, proto_ids, model_path, save_dir):
     os.makedirs(save_dir, exist_ok=True)
     np.save(f'{save_dir}/proto_logits_marginlesses.npy', logits_marginlesses)
 
-
 if __name__ == "__main__":
     print('argparse', flush=True)
-    args, save_dir, proto_path, data_dir, data_dir_root, model_path, csv_name = prase_args()
+    args, save_dir, proto_path, data_dir, data_dir_root, model_path, csv_name = parse_args()
 
     print('Feature extraction', flush=True)
     feature_extract(data_dir, model_path, save_dir)
@@ -126,7 +148,7 @@ if __name__ == "__main__":
 
     proto_json = json_load(proto_path)
     proto_ids = [v for v in proto_json.values()]
-    extract_proto_probs(data_dir_root+'/train/', [x[:-4] for x in proto_ids], model_path, save_dir)
+    extract_proto_probs(data_dir_root + '/train/', [x[:-4] for x in proto_ids], model_path, save_dir)
 
     features = np.load(f'{save_dir}/extracted_features.npy')
     sample_ids = [x for x in np.load(f'{save_dir}/sample_ids.npy', allow_pickle=True)] + [x for x in proto_ids]
@@ -146,7 +168,6 @@ if __name__ == "__main__":
     proto_json = json_load(proto_path)
     proto_class = np.array_split(np.argmax(last_layer_transpose, axis=1), 6)
 
-    ########################Creating CSV########################
     print('Creating CSV', flush=True)
     predictions = np.concatenate((np.load(f'{save_dir}/predictions.npy'), np.argmax(last_layer_transpose, axis=1)))
     np.save(f'{save_dir}/X_transformed.npy', X_transformed)
@@ -170,7 +191,7 @@ if __name__ == "__main__":
 
     votes_col = sample_votes_col + proto_votes_col
 
-    vis_df_ = pd.DataFrame({'sample_ids': samples_col, 'coord_x': coord_x_col, 'coord_y':coord_y_col, 'predictions': preds_col, 'expert votes': votes_col, 'prototype_or_not':proto_col})
+    vis_df_ = pd.DataFrame({'sample_ids': samples_col, 'coord_x': coord_x_col, 'coord_y': coord_y_col, 'predictions': preds_col, 'expert votes': votes_col, 'prototype_or_not': proto_col})
 
     for i in range(probs.shape[1]):
         vis_df_[f'class_{i}_prob'] = probs[:, i]
@@ -185,24 +206,3 @@ if __name__ == "__main__":
 
     vis_df.to_csv(f'{save_dir}/{csv_name}.csv', index=False)
     print('Finished CSV', flush=True)
-
-    # colors =  ['red','mediumblue','orange','navajowhite','khaki','green']
-
-    # fig = plt.figure(figsize=(20, 20))
-    # plt.scatter(X_transformed[:, 0][pred_labels == 0], X_transformed[:, 1][pred_labels == 0], s=3, alpha=1, c=colors[0], label='Other')
-    # plt.scatter(X_transformed[:, 0][pred_labels == 1], X_transformed[:, 1][pred_labels == 1], s=3, alpha=1, c=colors[1], label='Seizure')
-    # plt.scatter(X_transformed[:, 0][pred_labels == 2], X_transformed[:, 1][pred_labels == 2], s=3, alpha=1, c=colors[2], label='LPD')
-    # plt.scatter(X_transformed[:, 0][pred_labels == 3], X_transformed[:, 1][pred_labels == 3], s=3, alpha=1, c=colors[3], label='GPD')
-    # plt.scatter(X_transformed[:, 0][pred_labels == 4], X_transformed[:, 1][pred_labels == 4], s=3, alpha=1, c=colors[4], label='LRDA')
-    # plt.scatter(X_transformed[:, 0][pred_labels == 5], X_transformed[:, 1][pred_labels == 5], s=3, alpha=1, c=colors[5], label='GRDA')
-
-    # lgnd = plt.legend(fontsize=20)
-    # lgnd.legendHandles[0]._sizes = [30]
-    # lgnd.legendHandles[1]._sizes = [30]
-    # lgnd.legendHandles[2]._sizes = [30]
-    # lgnd.legendHandles[3]._sizes = [30]
-    # lgnd.legendHandles[4]._sizes = [30]
-    # lgnd.legendHandles[5]._sizes = [30]
-
-    # plt.savefig(f'{save_dir}/{csv_name}.jpg')
-    # plt.close('all')
